@@ -1,43 +1,7 @@
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
-const fs = require('fs');
-const ejs = require('ejs');
-const puppeteer = require('puppeteer');
-
-const browserCandidates = [
-    process.env.PUPPETEER_EXECUTABLE_PATH,
-    process.env.CHROME_PATH,
-    '/usr/bin/google-chrome-stable',
-    '/usr/bin/google-chrome',
-    '/usr/bin/chromium-browser',
-    '/usr/bin/chromium',
-    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
-    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
-].filter(Boolean);
-
-const getBrowserPath = () => {
-    for (const candidate of browserCandidates) {
-        if (fs.existsSync(candidate)) {
-            return candidate;
-        }
-    }
-    return null;
-};
-
-const browserExecutablePath = getBrowserPath();
-
-if (browserExecutablePath) {
-    console.log(`✅ Puppeteer executable found at ${browserExecutablePath}`);
-} else {
-    console.log('⚠️ Puppeteer executable path not found. Using default Puppeteer browser bundle.');
-}
-
-const PUPPETEER_LAUNCH_OPTIONS = {
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-    ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {})
-};
+const PDFDocument = require('pdfkit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,6 +13,20 @@ app.use(express.static(path.join(__dirname)));
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
+
+const createPdf = (res, filename, buildDoc) => {
+    const doc = new PDFDocument({ size: 'LETTER', margin: 40 });
+    const chunks = [];
+    doc.on('data', chunk => chunks.push(chunk));
+    doc.on('end', () => {
+        const result = Buffer.concat(chunks);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${filename}"`);
+        res.send(result);
+    });
+    buildDoc(doc);
+    doc.end();
+};
 
 if (!databaseUrl) {
     console.error('ERROR: No se encontró DATABASE_URL. Configura una base de datos PostgreSQL en Render o define la variable de entorno DATABASE_URL.');
@@ -419,51 +397,48 @@ app.get('/api/prestamos/:id/contrato.pdf', (req, res) => {
          JOIN clientes c ON p.id_cliente = c.id 
          WHERE p.id = $1`,
         [req.params.id],
-        async (err, p) => {
+        (err, p) => {
             if (err) return res.status(500).json({ error: err.message });
             if (!p) return res.status(404).json({ error: 'Préstamo no encontrado' });
 
-            try {
-                // Cálculo de métricas financieras del contrato
-                const totalPagar = (p.pago_semanal * p.plazo).toFixed(2);
-                const totalIntereses = (totalPagar - p.monto).toFixed(2);
-                const folio = String(p.id).padStart(6, '0');
+            const totalPagar = (p.pago_semanal * p.plazo).toFixed(2);
+            const totalIntereses = (totalPagar - p.monto).toFixed(2);
+            const folio = String(p.id).padStart(6, '0');
 
-                // Compilación del HTML mezclando la plantilla con los datos de la BD
-                const htmlCompilado = await ejs.renderFile(path.join(__dirname, 'views', 'contrato.ejs'), {
-                    prestamo: p,
-                    totalPagar,
-                    totalIntereses,
-                    folio
-                });
-
-                // Inicialización del motor del navegador headless
-                const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS);
-                const page = await browser.newPage();
-                
-                await page.setContent(htmlCompilado, { waitUntil: 'networkidle0' });
-                
-                const pdfBuffer = await page.pdf({ 
-                    format: 'LETTER',
-                    printBackground: true, // Renderiza colores y cajas decorativas CSS
-                    margin: { top: '0.6in', bottom: '0.6in', left: '0.6in', right: '0.6in' }
-                });
-
-                await browser.close();
-
-                // Respuestas http con headers nativos de PDF
-                res.setHeader('Content-Type', 'application/pdf');
-                res.setHeader('Content-Disposition', `inline; filename="Contrato_${folio}.pdf"`);
-                res.send(pdfBuffer);
-
-            } catch (error) {
-                console.error("Error al generar contrato con Puppeteer:", error);
-                res.status(500).json({ error: 'Fallo interno al crear PDF del contrato' });
-            }
+            createPdf(res, `Contrato_${folio}.pdf`, (doc) => {
+                doc.fontSize(18).text('Contrato de Préstamo', { align: 'center' });
+                doc.moveDown(0.5);
+                doc.fontSize(10).text(`Folio: ${folio}`);
+                doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`);
+                doc.moveDown(0.5);
+                doc.fontSize(12).text('Datos del cliente', { underline: true });
+                doc.moveDown(0.2);
+                doc.fontSize(10).text(`Cliente: ${p.cliente_nombre}`);
+                doc.text(`CURP: ${p.curp}`);
+                doc.text(`RFC: ${p.rfc}`);
+                doc.text(`Teléfono: ${p.telefono}`);
+                doc.text(`Correo: ${p.correo}`);
+                doc.text(`Dirección: ${p.direccion}`);
+                doc.moveDown(0.5);
+                doc.fontSize(12).text('Detalles del préstamo', { underline: true });
+                doc.moveDown(0.2);
+                doc.fontSize(10).text(`Monto solicitado: $${Number(p.monto).toFixed(2)}`);
+                doc.text(`Plazo: ${p.plazo} semanas`);
+                doc.text(`Pago semanal: $${Number(p.pago_semanal).toFixed(2)}`);
+                doc.text(`Tasa: ${Number(p.tasa).toFixed(2)}%`);
+                doc.text(`Total a pagar: $${totalPagar}`);
+                doc.text(`Intereses: $${totalIntereses}`);
+                doc.text(`Estado: ${p.estado}`);
+                doc.moveDown(0.5);
+                doc.fontSize(10).text('Este contrato es un documento generado automáticamente para efectos de presentación.');
+                doc.moveDown(1);
+                doc.text('Firma del cliente: ________________________________');
+                doc.moveDown(0.5);
+                doc.text('Firma del representante: __________________________');
+            });
         }
     );
 });
-
 
 // 2. ENDPOINT: RECIBO DE PAGO INDIVIDUAL
 app.get('/api/pagos/:id/recibo.pdf', (req, res) => {
@@ -480,52 +455,37 @@ app.get('/api/pagos/:id/recibo.pdf', (req, res) => {
             if (err) return res.status(500).json({ error: err.message });
             if (!pagoInfo) return res.status(404).json({ error: 'Registro de pago no encontrado' });
 
-            // Ejecutamos una subconsulta para calcular el acumulado histórico y el saldo real remanente
             db.get(
                 `SELECT COALESCE(SUM(monto_pagado), 0) AS acumulado
                  FROM pagos 
                  WHERE id_prestamo = $1 AND id <= $2`,
                 [pagoInfo.prestamo_id, pagoInfo.pago_id],
-                async (errSub, subRow) => {
+                (errSub, subRow) => {
                     if (errSub) return res.status(500).json({ error: errSub.message });
 
-                    try {
-                        const totalPagadoHastaFecha = subRow.acumulado;
-                        // El cálculo matemático correcto del saldo remanente
-                        const totalDeudaCalculada = pagoInfo.pago_semanal * pagoInfo.plazo;
-                        const saldoPendiente = Math.max(0, totalDeudaCalculada - totalPagadoHastaFecha).toFixed(2);
+                    const totalPagadoHastaFecha = subRow.acumulado;
+                    const totalDeudaCalculada = pagoInfo.pago_semanal * pagoInfo.plazo;
+                    const saldoPendiente = Math.max(0, totalDeudaCalculada - totalPagadoHastaFecha).toFixed(2);
 
-                        // Agregamos las propiedades calculadas al objeto final de la plantilla
-                        pagoInfo.total_pagado = totalPagadoHastaFecha;
-                        pagoInfo.saldo_pendiente = saldoPendiente;
-
-                        const htmlCompilado = await ejs.renderFile(path.join(__dirname, 'views', 'recibo.ejs'), {
-                            pago: pagoInfo
-                        });
-
-                        const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS);
-                        const page = await browser.newPage();
-                        
-                        await page.setContent(htmlCompilado, { waitUntil: 'networkidle0' });
-                        
-                        // Formato compacto optimizado para recibos/comprobantes de caja
-                        const pdfBuffer = await page.pdf({ 
-                            width: '5.5in',
-                            height: '8.5in',
-                            printBackground: true,
-                            margin: { top: '0.2in', bottom: '0.2in', left: '0.2in', right: '0.2in' }
-                        });
-
-                        await browser.close();
-
-                        res.setHeader('Content-Type', 'application/pdf');
-                        res.setHeader('Content-Disposition', `inline; filename="Recibo_Pago_${pagoInfo.pago_id}.pdf"`);
-                        res.send(pdfBuffer);
-
-                    } catch (error) {
-                        console.error("Error al generar recibo con Puppeteer:", error);
-                        res.status(500).json({ error: 'Fallo interno al crear PDF del recibo' });
-                    }
+                    createPdf(res, `Recibo_Pago_${pagoInfo.pago_id}.pdf`, (doc) => {
+                        doc.fontSize(18).text('Recibo de Pago', { align: 'center' });
+                        doc.moveDown(0.5);
+                        doc.fontSize(10).text(`Pago ID: ${pagoInfo.pago_id}`);
+                        doc.text(`Fecha de pago: ${new Date(pagoInfo.fecha_pago).toLocaleString('es-MX')}`);
+                        doc.text(`Cliente: ${pagoInfo.cliente_nombre}`);
+                        doc.text(`Préstamo ID: ${pagoInfo.prestamo_id}`);
+                        doc.moveDown(0.5);
+                        doc.fontSize(12).text('Resumen de pago', { underline: true });
+                        doc.moveDown(0.2);
+                        doc.fontSize(10).text(`Monto pagado: $${Number(pagoInfo.monto_pagado).toFixed(2)}`);
+                        doc.text(`Total pagado hasta la fecha: $${Number(totalPagadoHastaFecha).toFixed(2)}`);
+                        doc.text(`Saldo pendiente: $${saldoPendiente}`);
+                        doc.text(`Monto del préstamo: $${Number(pagoInfo.monto_prestamo).toFixed(2)}`);
+                        doc.text(`Pago semanal: $${Number(pagoInfo.pago_semanal).toFixed(2)}`);
+                        doc.text(`Plazo: ${pagoInfo.plazo} semanas`);
+                        doc.moveDown(1);
+                        doc.text('Gracias por su pago.', { align: 'center' });
+                    });
                 }
             );
         }
