@@ -4,6 +4,11 @@ const path = require('path');
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 
+const PUPPETEER_LAUNCH_OPTIONS = {
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+};
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const databaseUrl = process.env.DATABASE_URL || process.env.PG_CONNECTION_STRING;
@@ -403,7 +408,7 @@ app.get('/api/prestamos/:id/contrato.pdf', (req, res) => {
                 });
 
                 // Inicialización del motor del navegador headless
-                const browser = await puppeteer.launch({ headless: true });
+                const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS);
                 const page = await browser.newPage();
                 
                 await page.setContent(htmlCompilado, { waitUntil: 'networkidle0' });
@@ -468,7 +473,7 @@ app.get('/api/pagos/:id/recibo.pdf', (req, res) => {
                             pago: pagoInfo
                         });
 
-                        const browser = await puppeteer.launch({ headless: true });
+                        const browser = await puppeteer.launch(PUPPETEER_LAUNCH_OPTIONS);
                         const page = await browser.newPage();
                         
                         await page.setContent(htmlCompilado, { waitUntil: 'networkidle0' });
