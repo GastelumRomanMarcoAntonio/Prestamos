@@ -13,9 +13,13 @@ if (!databaseUrl) {
     process.exit(1);
 }
 
+const useSsl = process.env.NODE_ENV === 'production'
+    || process.env.PGSSLMODE === 'require'
+    || databaseUrl.includes('render.com');
+
 const pool = new Pool({
     connectionString: databaseUrl,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+    ssl: useSsl ? { rejectUnauthorized: false } : false,
 });
 
 pool.on('error', (err) => {
