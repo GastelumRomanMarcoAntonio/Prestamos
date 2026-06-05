@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Solicitud y Simulador - CrediFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="img/logo.svg" alt="Logo CrediFlow">
+            <span>CrediFlow</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+            <li><a href="clientes_directorio.html" class="menu-link">Clientes</a></li>
+            <li><a href="prestamos_simulador.html" class="menu-link active">Solicitudes</a></li>
+            <li><a href="prestamos_aprobaciones.html" class="menu-link">Aprobaciones</a></li>
+            <li><a href="caja_desembolsos.html" class="menu-link">Desembolsos</a></li>
+            <li><a href="caja_pagos.html" class="menu-link">Pagos</a></li>
+            <li><a href="cobranza_mora.html" class="menu-link">Cobranza</a></li>
+            <li><a href="admin_auditoria.html" class="menu-link">Auditoría</a></li>
+            <li><a href="index.html" class="menu-link menu-link-exit">Salir</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-navbar">
+            <h1>Simulador y Nueva Solicitud </h1>
+        </div>
+        
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">Configurar Préstamo</div>
+                <form id="form-simulador">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Cliente</label>
+                            <select id="id_cliente" required>
+                                <option value="">-- Seleccionar de la Base de Datos --</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Monto Solicitado ($)</label><input type="number" id="monto" value="10000" required></div>
+                        <div class="form-group"><label>Plazo (Semanas)</label><input type="number" id="plazo" value="24" required></div>
+                        <div class="form-group"><label>Tasa de Interés Anual (%)</label><input type="number" id="tasa" value="15" required></div>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Generar Tabla de Amortización</button>
+                </form>
+            </div>
+
+            <div id="contenedor-amortizacion" class="card" style="display: none;">
+                <div class="card-header">Tabla de Amortización</div>
+                <table>
+                    <thead>
+                        <tr><th>No. Pago</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr>
+                    </thead>
+                    <tbody id="tabla-cuerpo"></tbody>
+                </table>
+                <button id="btn-enviar-solicitud" class="btn btn-primary" style="margin-top: 15px;">Enviar Solicitud a Aprobación</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

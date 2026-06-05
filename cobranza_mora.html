@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cobranza y Mora - CrediFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="img/logo.svg" alt="Logo CrediFlow">
+            <span>CrediFlow</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+            <li><a href="clientes_directorio.html" class="menu-link">Clientes</a></li>
+            <li><a href="prestamos_simulador.html" class="menu-link">Solicitudes</a></li>
+            <li><a href="prestamos_aprobaciones.html" class="menu-link">Aprobaciones</a></li>
+            <li><a href="caja_desembolsos.html" class="menu-link">Desembolsos</a></li>
+            <li><a href="caja_pagos.html" class="menu-link">Pagos</a></li>
+            <li><a href="cobranza_mora.html" class="menu-link active">Cobranza</a></li>
+            <li><a href="admin_auditoria.html" class="menu-link">Auditoría</a></li>
+            <li><a href="index.html" class="menu-link menu-link-exit">Salir</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-navbar">
+            <h1>Gestión de Cartera Vencida </h1>
+        </div>
+        
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">Clientes en Estatus de Mora</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Folio Crédito</th>
+                            <th>Cliente</th>
+                            <th>Teléfono</th>
+                            <th>Días de Atraso</th>
+                            <th>Multa Acumulada</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-mora">
+                        <!-- Datos cargados desde PHP -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

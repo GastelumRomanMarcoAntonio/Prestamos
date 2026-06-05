@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Contrato de Crédito - CrediFlow</title>
+    <style>
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #0f172a; margin: 0; padding: 40px; line-height: 1.6; }
+        .header { border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; }
+        .logo-title h1 { color: #1e3a8a; margin: 0; font-size: 28px; letter-spacing: -0.5px; }
+        .logo-title p { color: #64748b; margin: 2px 0 0 0; font-size: 12px; }
+        .folio-box { text-align: right; }
+        .folio-box span { font-size: 11px; color: #64748b; font-weight: bold; text-transform: uppercase; }
+        .folio-box h2 { margin: 0; color: #ef4444; font-size: 22px; }
+        
+        .seccion-titulo { background-color: #f8fafc; border-left: 4px solid #3b82f6; padding: 6px 12px; font-weight: bold; font-size: 13px; color: #1e40af; margin-top: 25px; margin-bottom: 15px; text-transform: uppercase; }
+        .grid-datos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 15px; }
+        .grid-tres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
+        
+        .campo { background: #fafafa; border: 1px solid #f1f5f9; padding: 10px; border-radius: 6px; }
+        .campo label { display: block; font-size: 10px; color: #94a3b8; font-weight: bold; margin-bottom: 2px; }
+        .campo div { font-size: 13px; font-weight: 600; color: #334155; }
+
+        .destacado-monto { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: 8px; text-align: center; margin: 20px 0; }
+        .destacado-monto span { font-size: 11px; color: #166534; font-weight: bold; display: block; }
+        .destacado-monto .monto { font-size: 30px; color: #15803d; font-weight: 800; margin: 4px 0; }
+        .destacado-monto p { font-size: 12px; color: #1e3a8a; margin: 0; font-weight: 500; }
+
+        .clausulas { font-size: 11px; color: #475569; text-align: justify; }
+        .clausulas strong { color: #0f172a; }
+
+        .firmas { margin-top: 60px; display: flex; justify-content: space-between; text-align: center; page-break-inside: avoid; }
+        .firma-box { width: 42%; }
+        .linea { border-top: 1px solid #475569; margin-top: 50px; padding-top: 6px; font-size: 12px; font-weight: bold; }
+        .firma-box span { font-size: 10px; color: #64748b; display: block; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo-title">
+            <h1>CrediFlow</h1>
+            <p>Soluciones Financieras Eficientes</p>
+        </div>
+        <div class="folio-box">
+            <span>Contrato de Apertura</span>
+            <h2>#<%= folio %></h2>
+        </div>
+    </div>
+
+    <div class="seccion-titulo">Información del Acreditado</div>
+    <div class="grid-datos">
+        <div class="campo"><label>CLIENTE / TITULAR</label><div><%= prestamo.cliente_nombre %></div></div>
+        <div class="campo"><label>CURP</label><div><%= prestamo.curp %></div></div>
+    </div>
+    <div class="grid-tres">
+        <div class="campo"><label>RFC</label><div><%= prestamo.rfc || '—' %></div></div>
+        <div class="campo"><label>TELÉFONO</label><div><%= prestamo.telefono || '—' %></div></div>
+        <div class="campo"><label>CORREO ELECTRÓNICO</label><div><%= prestamo.correo || '—' %></div></div>
+    </div>
+    <div class="campo" style="margin-bottom: 20px;"><label>DOMICILIADO EN</label><div><%= prestamo.direccion || '—' %></div></div>
+
+    <div class="seccion-titulo">Condiciones Financieras</div>
+    <div class="destacado-monto">
+        <span>CANTIDAD TOTAL OTORGADA</span>
+        <div class="monto">$<%= Number(prestamo.monto).toLocaleString('es-MX', {minimumFractionDigits: 2}) %> MXN</div>
+        <p>Plazo pactado: <strong><%= prestamo.plazo %> Semanas</strong> · Tasa de Interés: <strong><%= prestamo.tasa %>% Anual</strong></p>
+    </div>
+
+    <div class="grid-tres">
+        <div class="campo"><label>CUOTA SEMANAL</label><div>$<%= Number(prestamo.pago_semanal).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></div></div>
+        <div class="campo"><label>TOTAL INTERESES</label><div>$<%= Number(totalIntereses).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></div></div>
+        <div class="campo"><label>TOTAL NETO A PAGAR</label><div>$<%= Number(totalPagar).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></div></div>
+    </div>
+
+    <div class="seccion-titulo">Cláusulas del Crédito</div>
+    <div class="clausulas">
+        <p><strong>PRIMERA (Entrega del Capital).</strong> CrediFlow otorga en este acto la cantidad convenida al Acreditado, quien acepta de conformidad declarando recibirla en su totalidad.</p>
+        <p><strong>SEGUNDA (Esquema de Amortización).</strong> El Acreditado se compromete a pagar de forma ininterrumpida la cuota estipulada de <strong>$<%= Number(prestamo.pago_semanal).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></strong> de manera semanal durante el plazo determinado de <strong><%= prestamo.plazo %> semanas</strong>.</p>
+        <p><strong>TERCERA (Incumplimiento y Mora).</strong> Cualquier atraso en las fechas límites de pago generará cargos moratorios proporcionales al saldo insoluto que correspondan a las políticas institucionales vigentes.</p>
+    </div>
+
+    <div class="firmas">
+        <div class="firma-box">
+            <div class="linea"><%= prestamo.cliente_nombre %></div>
+            <span>EL ACREDITADO (Firma de Conformidad)</span>
+        </div>
+        <div class="firma-box">
+            <div class="linea">Representante Legal</div>
+            <span>CREDIFLOW S.A. DE C.V.</span>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nuevo Cliente - CrediFlow</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="img/logo.svg" alt="Logo CrediFlow">
+            <span>CrediFlow</span>
+        </div>
+        <ul class="sidebar-menu">
+            <li><a href="dashboard.html" class="menu-link">Dashboard</a></li>
+            <li><a href="clientes_directorio.html" class="menu-link active">Clientes</a></li>
+            <li><a href="prestamos_simulador.html" class="menu-link">Solicitudes</a></li>
+            <li><a href="prestamos_aprobaciones.html" class="menu-link">Aprobaciones</a></li>
+            <li><a href="caja_desembolsos.html" class="menu-link">Desembolsos</a></li>
+            <li><a href="caja_pagos.html" class="menu-link">Pagos</a></li>
+            <li><a href="cobranza_mora.html" class="menu-link">Cobranza</a></li>
+            <li><a href="admin_auditoria.html" class="menu-link">Auditoría</a></li>
+            <li><a href="index.html" class="menu-link menu-link-exit">Salir</a></li>
+        </ul>
+    </div>
+
+    <div class="main-content">
+        <div class="top-navbar">
+            <h1>Registro de Cliente </h1>
+        </div>
+        
+        <div class="content-body">
+            <div class="card">
+                <div class="card-header">Datos del Expediente</div>
+                <form id="form-registro-cliente">
+                    <div class="form-grid">
+                        <div class="form-group"><label>Nombre(s) *</label><input type="text" id="nombre" required></div>
+                        <div class="form-group"><label>Apellido Paterno *</label><input type="text" id="paterno" required></div>
+                        <div class="form-group"><label>Apellido Materno</label><input type="text" id="materno"></div>
+                        <div class="form-group"><label>Fecha de Nacimiento *</label><input type="date" id="fecha_nac" required></div>
+                        <div class="form-group"><label>CURP *</label><input type="text" id="curp" required maxlength="18"></div>
+                        <div class="form-group"><label>RFC *</label><input type="text" id="rfc" required maxlength="13"></div>
+                        <div class="form-group"><label>Teléfono *</label><input type="tel" id="telefono" required></div>
+                        <div class="form-group"><label>Correo Electrónico</label><input type="email" id="correo"></div>
+                        <div class="form-group" style="grid-column: 1 / -1;"><label>Dirección Completa *</label><input type="text" id="direccion" required></div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Guardar Cliente en Base de Datos</button>
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='clientes_directorio.html'">Cancelar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="js/main.js"></script>
+</body>
+</html>

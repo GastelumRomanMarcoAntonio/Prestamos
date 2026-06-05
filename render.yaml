@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: prestamos-app
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        value: postgresql://database_zodp_user:Dr8XTBsDCVROOYuNDfbYbyRzRSEqWRyg@dpg-d8hjf86q1p3s739gvio0-a.ohio-postgres.render.com/database_zodp

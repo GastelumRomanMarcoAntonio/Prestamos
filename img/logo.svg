@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">CrediFlow Logo</title>
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="56" fill="url(#logoGradient)"/>
+  <path d="M44 34h32a12 12 0 0 1 12 12v28a12 12 0 0 1-12 12H60v8a4 4 0 0 1-8 0V62H44a12 12 0 0 1-12-12V46a12 12 0 0 1 12-12Zm4 8v18h16a4 4 0 0 0 4-4V46a4 4 0 0 0-4-4H48Zm28 36a4 4 0 0 0 4-4V54H48v20a4 4 0 0 0 4 4h20Z" fill="#fff"/>
+</svg>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Comprobante de Pago - CrediFlow</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #1e293b; margin: 0; padding: 30px; font-size: 13px; }
+        .ticket { border: 1px dashed #cbd5e1; padding: 25px; max-width: 500px; margin: 0 auto; background: #fff; }
+        .header { text-align: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { margin: 0; font-size: 24px; color: #0f172a; }
+        .header p { margin: 4px 0; color: #64748b; font-size: 11px; }
+        
+        .titulo-recibo { text-align: center; font-weight: bold; font-size: 14px; margin-bottom: 20px; color: #2563eb; letter-spacing: 0.5px; }
+        
+        .fila-detalle { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9; }
+        .fila-detalle span:first-child { color: #64748b; font-weight: 500; }
+        .fila-detalle span:last-child { font-weight: bold; color: #0f172a; text-align: right; }
+        
+        .caja-pago { background-color: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 15px; text-align: center; margin: 20px 0; }
+        .caja-pago span { font-size: 10px; color: #166534; font-weight: bold; display: block; }
+        .caja-pago .monto { font-size: 26px; color: #16a34a; font-weight: 800; margin-top: 2px; }
+        
+        .caja-saldo { background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 12px; text-align: center; margin-bottom: 20px; }
+        .caja-saldo span { font-size: 11px; color: #991b1b; font-weight: bold; }
+        .caja-saldo .saldo { font-size: 16px; color: #dc2626; font-weight: bold; }
+        
+        .footer { text-align: center; font-size: 10px; color: #94a3b8; margin-top: 30px; border-top: 1px solid #e2e8f0; padding-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="header">
+            <h1>CrediFlow</h1>
+            <p>Comprobante de Operación de Caja</p>
+            <p>Fecha de Impresión: <%= new Date().toLocaleDateString('es-MX') %></p>
+        </div>
+
+        <div class="titulo-recibo">RECIBO DE PAGO OFICIAL</div>
+
+        <div class="fila-detalle">
+            <span>No. de Recibo:</span>
+            <span>#<%= String(pago.pago_id).padStart(6, '0') %></span>
+        </div>
+        <div class="fila-detalle">
+            <span>Folio Crédito Asociado:</span>
+            <span>#<%= String(pago.prestamo_id).padStart(6, '0') %></span>
+        </div>
+        <div class="fila-detalle">
+            <span>Cliente Acreditado:</span>
+            <span><%= pago.cliente_nombre %></span>
+        </div>
+        <div class="fila-detalle">
+            <span>Fecha y Hora de Operación:</span>
+            <span><%= pago.fecha_pago %></span>
+        </div>
+
+        <div class="caja-pago">
+            <span>MONTO TOTAL COBRADO</span>
+            <div class="monto">$<%= Number(pago.monto_pagado).toLocaleString('es-MX', {minimumFractionDigits: 2}) %> MXN</div>
+        </div>
+
+        <div class="fila-detalle">
+            <span>Valor Original del Crédito:</span>
+            <span>$<%= Number(pago.monto_prestamo).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></span>
+        </div>
+        <div class="fila-detalle">
+            <span>Cuota Semanal Pactada:</span>
+            <span>$<%= Number(pago.pago_semanal).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></span>
+        </div>
+        <div class="fila-detalle">
+            <span>Total Pagado a la Fecha:</span>
+            <span>$<%= Number(pago.total_pagado).toLocaleString('es-MX', {minimumFractionDigits: 2}) %></span>
+        </div>
+
+        <div style="margin-top: 15px;"></div>
+
+        <div class="caja-saldo">
+            <% if (pago.saldo_pendiente <= 0) { %>
+                <span style="color: #166534;">🎉 ¡CRÉDITO TOTALMENTE LIQUIDADO!</span>
+            <% } else { %>
+                <span>SALDO REMANENTE PENDIENTE</span>
+                <div class="saldo">$<%= Number(pago.saldo_pendiente).toLocaleString('es-MX', {minimumFractionDigits: 2}) %> MXN</div>
+            <% } %>
+        </div>
+
+        <div class="footer">
+            <p>Conserve este boleto/recibo como respaldo oficial de su abono.</p>
+            <p>CrediFlow agradece su puntualidad.</p>
+        </div>
+    </div>
+</body>
+</html>
