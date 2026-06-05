@@ -1,12 +1,42 @@
 const express = require('express');
 const { Pool } = require('pg');
 const path = require('path');
+const fs = require('fs');
 const ejs = require('ejs');
 const puppeteer = require('puppeteer');
 
+const browserCandidates = [
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    process.env.CHROME_PATH,
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+].filter(Boolean);
+
+const getBrowserPath = () => {
+    for (const candidate of browserCandidates) {
+        if (fs.existsSync(candidate)) {
+            return candidate;
+        }
+    }
+    return null;
+};
+
+const browserExecutablePath = getBrowserPath();
+
+if (browserExecutablePath) {
+    console.log(`✅ Puppeteer executable found at ${browserExecutablePath}`);
+} else {
+    console.log('⚠️ Puppeteer executable path not found. Using default Puppeteer browser bundle.');
+}
+
 const PUPPETEER_LAUNCH_OPTIONS = {
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    ...(browserExecutablePath ? { executablePath: browserExecutablePath } : {})
 };
 
 const app = express();
