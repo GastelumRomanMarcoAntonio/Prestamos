@@ -8,6 +8,13 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const databaseUrl = process.env.DATABASE_URL || process.env.PG_CONNECTION_STRING;
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname)));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 if (!databaseUrl) {
     console.error('ERROR: No se encontró DATABASE_URL. Configura una base de datos PostgreSQL en Render o define la variable de entorno DATABASE_URL.');
     process.exit(1);
@@ -491,6 +498,13 @@ app.get('/api/pagos/:id/recibo.pdf', (req, res) => {
 });
 
 // ─── INICIAR SERVIDOR ────────────────────────────────────────────────────────
+app.get(/^(?!\/api).*/, (req, res) => {
+    if (req.method === 'GET' && !path.extname(req.path)) {
+        return res.sendFile(path.join(__dirname, 'index.html'));
+    }
+    res.status(404).json({ error: 'Endpoint no encontrado' });
+});
+
 app.listen(PORT, () => {
     console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
     console.log(`   Usuario por defecto: admin / admin123`);
